@@ -5,14 +5,15 @@ import tensorflow as tf
 
 from simpler_env.evaluation.argparse import get_args
 from simpler_env.evaluation.maniskill2_evaluator import maniskill2_evaluator
-from simpler_env.policies.octo.octo_server_model import OctoServerInference
-from simpler_env.policies.rt1.rt1_model import RT1Inference
-
-try:
-    from simpler_env.policies.octo.octo_model import OctoInference
-except ImportError as e:
-    print("Octo is not correctly imported.")
-    print(e)
+# from simpler_env.policies.octo.octo_server_model import OctoServerInference
+# from simpler_env.policies.rt1.rt1_model import RT1Inference
+from simpler_env.policies.llava.llava_model import LLaVAInference
+# from simpler_env.policies.moellava.moellava_model import MoeLLaVAInference
+# try:
+#     from simpler_env.policies.octo.octo_model import OctoInference
+# except ImportError as e:
+#     print("Octo is not correctly imported.")
+#     print(e)
 
 
 if __name__ == "__main__":
@@ -29,32 +30,56 @@ if __name__ == "__main__":
             [tf.config.LogicalDeviceConfiguration(memory_limit=args.tf_memory_limit)],
         )
 
-    # policy model creation; update this if you are using a new policy model
-    if args.policy_model == "rt1":
-        assert args.ckpt_path is not None
-        model = RT1Inference(
-            saved_model_path=args.ckpt_path,
+    # # policy model creation; update this if you are using a new policy model
+    # if args.policy_model == "rt1":
+    #     assert args.ckpt_path is not None
+    #     model = RT1Inference(
+    #         saved_model_path=args.ckpt_path,
+    #         policy_setup=args.policy_setup,
+    #         action_scale=args.action_scale,
+    #     )
+    # elif "octo" in args.policy_model:
+    #     if args.ckpt_path is None or args.ckpt_path == "None":
+    #         args.ckpt_path = args.policy_model
+    #     if "server" in args.policy_model:
+    #         model = OctoServerInference(
+    #             model_type=args.ckpt_path,
+    #             policy_setup=args.policy_setup,
+    #             action_scale=args.action_scale,
+    #         )
+    #     else:
+    #         model = OctoInference(
+    #             model_type=args.ckpt_path,
+    #             policy_setup=args.policy_setup,
+    #             init_rng=args.octo_init_rng,
+    #             action_scale=args.action_scale,
+    #         )
+    
+    
+    
+    
+    
+    
+    
+    if "llava" in args.policy_model:
+        model = LLaVAInference(
+            saved_model_path= args.ckpt_path,
             policy_setup=args.policy_setup,
-            action_scale=args.action_scale,
         )
-    elif "octo" in args.policy_model:
-        if args.ckpt_path is None or args.ckpt_path == "None":
-            args.ckpt_path = args.policy_model
-        if "server" in args.policy_model:
-            model = OctoServerInference(
-                model_type=args.ckpt_path,
-                policy_setup=args.policy_setup,
-                action_scale=args.action_scale,
-            )
-        else:
-            model = OctoInference(
-                model_type=args.ckpt_path,
-                policy_setup=args.policy_setup,
-                init_rng=args.octo_init_rng,
-                action_scale=args.action_scale,
-            )
     else:
         raise NotImplementedError()
+        
+        
+        
+        
+        
+    # if "moellava" in args.policy_model:
+    #     model = MoeLLaVAInference(
+    #         saved_model_path= args.ckpt_path,
+    #         policy_setup=args.policy_setup,
+    #     )
+    # else:
+    #     raise NotImplementedError()
 
     # run real-to-sim evaluation
     success_arr = maniskill2_evaluator(model, args)

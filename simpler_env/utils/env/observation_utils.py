@@ -1,5 +1,6 @@
 def get_image_from_maniskill2_obs_dict(env, obs, camera_name=None):
     # obtain image from observation dictionary returned by ManiSkill2 environment
+    env = env.unwrapped if hasattr(env, 'unwrapped') else env
     if camera_name is None:
         if "google_robot" in env.robot_uid:
             camera_name = "overhead_camera"
