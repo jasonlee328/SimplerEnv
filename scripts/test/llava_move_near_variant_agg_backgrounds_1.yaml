@@ -1,0 +1,47 @@
+version: v2
+description: simpler_eval_move_near_backgrounds_1
+budget: ai2/prior
+tasks:
+- name: eval
+  replicas: 1
+  image:
+    beaker: jiafeid/simpler-docker-ori
+  command: ['/bin/bash', '-c']
+  arguments:
+  - >-
+    nvidia-smi &&
+    apt update && apt install libglvnd-dev libvulkan1 libjpeg-dev libpng-dev -y &&
+    cd /data/input/jiafei/GroundedVLA/SimplerEnv/ManiSkill2_real2sim &&
+    pip install -e. &&
+    cd /data/input/jiafei/GroundedVLA/SimplerEnv && 
+    pip install -e . &&
+    pip install transformers==4.49.0 &&
+    pip install torch==2.6.0 &&
+    pip install --no-cache-dir --upgrade torchvision &&
+    pip install --no-cache-dir --upgrade flash-attn &&
+    bash /data/input/jiafei/GroundedVLA/SimplerEnv/scripts/test/llava_move_near_variant_agg_backgrounds_1.sh
+  datasets:
+  - mountPath: /data/input
+    source:
+      weka: prior-default
+  result:
+    path: /data/results
+  envVars:
+  - name: ALLENACT_DEBUG_VST_TIMEOUT
+    value: 2000
+  - name: ALLENACT_DEBUG
+    value: true
+  - name: NCCL_SOCKET_IFNAME
+    value: ib
+  - name: NCCL_TIMEOUT
+    value: 36000000
+  resources:
+    gpuCount: 1
+    sharedMemory: 1000GiB
+  context:
+    priority: urgent
+    preemptible: false
+  constraints:
+    cluster: [ ai2/jupiter-cirrascale-2 ]
+  hostNetworking: true
+  leaderSelection: true

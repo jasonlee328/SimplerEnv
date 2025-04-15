@@ -3,15 +3,23 @@ Evaluate a model on ManiSkill2 environment.
 """
 
 import os
-
+import time
 import numpy as np
 from transforms3d.euler import quat2euler
 import cv2
+import torch
 from simpler_env.utils.env.env_builder import build_maniskill2_env, get_robot_control_mode
 from simpler_env.utils.env.observation_utils import get_image_from_maniskill2_obs_dict
 from simpler_env.utils.visualization import write_video
-
-
+import os
+# if os.environ.get("RANK", "0") == "0":
+#     import debugpy
+#     # Listen on port 5678 (adjust if needed)
+#     debugpy.listen(("172.17.0.1", 5678))
+#     print("Debugger is listening on port 5678. Waiting for client to attach...")
+#     debugpy.wait_for_client()
+import faulthandler
+faulthandler.enable()
 def run_maniskill2_eval_single_episode(
     model,
     ckpt_path,
@@ -52,11 +60,14 @@ def run_maniskill2_eval_single_episode(
         camera_cfgs={"add_segmentation": True},
         rgb_overlay_path=rgb_overlay_path,
     )
+   
     if enable_raytracing:
         ray_tracing_dict = {"shader_dir": "rt"}
         ray_tracing_dict.update(additional_env_build_kwargs)
         # put raytracing dict keys before other keys for compatibility with existing result naming and metric calculation
         additional_env_build_kwargs = ray_tracing_dict
+        
+
     env = build_maniskill2_env(
         env_name,
         **additional_env_build_kwargs,
@@ -82,7 +93,9 @@ def run_maniskill2_eval_single_episode(
         env_reset_options["obj_init_options"] = {
             "episode_id": obj_episode_id,
         }
+    # print("Reset env with options:", env_reset_options)
     obs, _ = env.reset(options=env_reset_options)
+    # print("Reset success")
 
     # for long-horizon environments, we check if the current subtask is the final subtask
     is_final_subtask = env.unwrapped.is_final_subtask() 
@@ -111,7 +124,25 @@ def run_maniskill2_eval_single_episode(
     # Step the environment
     while not (predicted_terminated or truncated):
         # step the model; "raw_action" is raw model action output; "action" is the processed action to be sent into maniskill env
-        raw_action, action, annotated_image = model.step(image, task_description)
+        try:
+            raw_action, action, annotated_image = model.step(image, task_description)
+        except Exception as e:
+            print(f"[Fail-safe triggered] model.step() failed at timestep {timestep}: {e}")
+            
+            # Fail-safe defaults
+            raw_action = {
+                "world_vector": np.array([0.0, 0.0, 0.0]),
+                "rotation_delta": np.array([0.0, 0.0, 0.0]),
+                "open_gripper": np.array([1.0]),
+            }
+            annotated_image = image.copy()
+
+            action = {
+                "world_vector": raw_action["world_vector"],
+                "rot_axangle": np.array([0.0, 0.0, 0.0]),
+                "gripper": np.array([1.0]),
+                "terminate_episode": np.array([0.0]),
+            }
         predicted_actions.append(raw_action)
         predicted_terminated = bool(action["terminate_episode"][0] > 0)
         if predicted_terminated:
@@ -171,7 +202,7 @@ def run_maniskill2_eval_single_episode(
     annotated_video_path = f"{ckpt_path_basename}/{scene_name}/{control_mode}/{env_save_name}/rob_{robot_init_x}_{robot_init_y}_rot_{r:.3f}_{p:.3f}_{y:.3f}_rgb_overlay_{rgb_overlay_path_str}/annotated_{video_name}"
     annotated_video_path = os.path.join(logging_dir, video_path)
     write_video(video_path, annotated_frames, fps=5)
-    write_video(annotated_video_path, annotated_frames, fps=5)
+    # write_video(annotated_video_path, annotated_frames, fps=5)
 
 
     # save action trajectory
@@ -180,7 +211,36 @@ def run_maniskill2_eval_single_episode(
     os.makedirs(action_root, exist_ok=True)
     action_path = action_root + os.path.basename(action_path)
     model.visualize_epoch(predicted_actions, images, save_path=action_path)
+    
+    # try:
 
+    #     torch.cuda.empty_cache()
+    #     print("Torch GPU cache cleared.")
+    # except Exception as e:
+    #     print("Error clearing torch cache:", e)
+        
+    # import gc
+    # gc.collect()
+    
+    
+    # try:
+    #     del predicted_actions, images, annotated_frames
+    # except Exception as e:
+    #     print("Error deleting variables:", e)
+        
+        
+        
+    # try:
+    #     if hasattr(env, "close"):
+    #         env.close()
+    #     if hasattr(model, "close"):
+    #         model.close()
+    # except Exception as cleanup_error:
+    #     print(f"Error during cleanup: {cleanup_error}")
+    
+    # # Delay to allow asynchronous cleanup routines to finish
+    # time.sleep(4)
+    
     return success == "success"
 
 
@@ -224,7 +284,10 @@ def maniskill2_evaluator(model, args):
                             )
                 elif args.obj_variation_mode == "episode":
                     for obj_episode_id in range(args.obj_episode_range[0], args.obj_episode_range[1]):
-                        success_arr.append(run_maniskill2_eval_single_episode(obj_episode_id=obj_episode_id, **kwargs))
+                        # print(f"[DEBUG] Starting evaluation for episode: {obj_episode_id}")
+                        x = run_maniskill2_eval_single_episode(obj_episode_id=obj_episode_id, **kwargs)
+                        # print(f"[DEBUG] Finished evaluation for episode: {obj_episode_id}, result: {x}")
+                        success_arr.append(x)
                 else:
                     raise NotImplementedError()
 

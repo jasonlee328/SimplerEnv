@@ -1,0 +1,50 @@
+version: v2
+description: simpler_eval_drawer_agg_lightings_1
+budget: ai2/prior
+tasks:
+- name: eval
+  replicas: 1
+  image:
+    beaker: jiafeid/simpler-docker-ori
+  command: ['/bin/bash', '-c']
+  arguments:
+  - >-
+    nvidia-smi &&
+    apt update && apt install libglvnd-dev libvulkan1 -y &&
+    cd /data/input/jiafei/GroundedVLA/SimplerEnv/ManiSkill2_real2sim &&
+    pip install -e. &&
+    cd /data/input/jiafei/GroundedVLA/SimplerEnv && 
+    pip install -e . &&
+    cd /data/input/jiafei/GroundedVLA/LLaVA-NeXT &&
+    pip install --upgrade pip &&
+    pip install -e '.[train]' &&
+    pip install pynvml==11.5.0 &&
+    pip install accelerate==0.29.3 &&
+    pip install flash-attn==2.5.7 &&
+    cd /data/input/jiafei/GroundedVLA/SimplerEnv &&
+    bash /data/input/jiafei/GroundedVLA/SimplerEnv/scripts/open_drawer/llava_drawer_variant_agg_lightings_1.sh
+  datasets:
+  - mountPath: /data/input
+    source:
+      weka: prior-default
+  result:
+    path: /data/results
+  envVars:
+  - name: ALLENACT_DEBUG_VST_TIMEOUT
+    value: 2000
+  - name: ALLENACT_DEBUG
+    value: true
+  - name: NCCL_SOCKET_IFNAME
+    value: ib
+  - name: NCCL_TIMEOUT
+    value: 36000000
+  resources:
+    gpuCount: 1
+    sharedMemory: 1000GiB
+  context:
+    priority: high
+    preemptible: false
+  constraints:
+    cluster: [ ai2/saturn-cirrascale, ai2/neptune-cirrascale, ai2/ceres-cirrascale ]
+  hostNetworking: true
+  leaderSelection: true
