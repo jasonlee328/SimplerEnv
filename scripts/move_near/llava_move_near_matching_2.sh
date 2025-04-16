@@ -1,7 +1,7 @@
 
 gpu_id=0
 
-declare -a arr=("/data/input/jiafei/GroundedVLA/apr13-float")
+declare -a arr=("molmo-act/apr-14-float-ratio")
 
 env_name=MoveNearGoogleBakedTexInScene-v0
 # env_name=MoveNearGoogleBakedTexInScene-v1

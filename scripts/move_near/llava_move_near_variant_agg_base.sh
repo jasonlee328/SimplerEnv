@@ -4,7 +4,7 @@ gpu_id=0
 # declare -a arr=("/data/input/jiafei/GroundedVLA/checkpoint/mar17_line99-1")
 
 # declare -a arr=("/data/input/jiafei/GroundedVLA/checkpoint/mar17_line99-1")
-declare -a arr=("/data/input/jiafei/GroundedVLA/apr13-float")
+declare -a arr=("molmo-act/apr-14-float-ratio")
 
 for ckpt_path in "${arr[@]}"; do echo "$ckpt_path"; done
 

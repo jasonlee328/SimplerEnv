@@ -1,9 +1,12 @@
 #!/bin/bash
 # Hard-coded checkpoint and cluster values
-NEW_CHECKPOINT="/data/input/jiafei/GroundedVLA/apr13-float"
+NEW_CHECKPOINT="molmo-act/apr-14-float-ratio"
 NEW_POLICY_MODEL="--policy-model molmo"
 CUSTOM_YAML_ARGS="nvidia-smi &&
 apt update && apt install libglvnd-dev libvulkan1 libjpeg-dev libpng-dev libglib2.0-0 ffmpeg -y &&
+mkdir -p /data/input/jiafei/GroundedVLA/ &&
+cd /data/input/jiafei/GroundedVLA && pwd &&
+git clone --recursive https://github.com/jasonlee328/SimplerEnv.git &&
 source /opt/conda/etc/profile.d/conda.sh &&
 conda activate simpler_env &&
 cd /data/input/jiafei/GroundedVLA/SimplerEnv/ManiSkill2_real2sim &&
@@ -16,13 +19,13 @@ pip install --no-cache-dir --upgrade torchvision &&
 pip install --no-cache-dir --upgrade flash-attn &&
 pip install accelerate==1.6.0 &&"
 
-NEW_YAML_CLUSTER_ARG="ai2/jupiter-cirrascale-2, ai2/ceres-cirrascale"
+NEW_YAML_CLUSTER_ARG="ai2/augusta-google-1"
 NEW_PRIORITY="urgent"
 
 EXPERIMENT_DIRS=(
-  "/data/input/jiafei/GroundedVLA/SimplerEnv/scripts/pick_coke_can"
-  "/data/input/jiafei/GroundedVLA/SimplerEnv/scripts/open_drawer"
-  "/data/input/jiafei/GroundedVLA/SimplerEnv/scripts/move_near"
+  "/data/input/jiafei/SimplerEnv/scripts/pick_coke_can"
+  "/data/input/jiafei/SimplerEnv/scripts/open_drawer"
+  "/data/input/jiafei/SimplerEnv/scripts/move_near"
 )
 
 for dir in "${EXPERIMENT_DIRS[@]}"; do
@@ -145,16 +148,16 @@ for dir in "${EXPERIMENT_DIRS[@]}"; do
   done
 done
 
-# --- Submit experiments using beaker ---
-for dir in "${EXPERIMENT_DIRS[@]}"; do
-  echo "Submitting experiments in directory: $dir"
-  for yaml_file in "$dir"/*.yaml; do
-    if [ -f "$yaml_file" ]; then
-      echo "Running experiment for: $yaml_file"
-      beaker experiment create "$yaml_file"
-    fi
-  done
-done
+# # --- Submit experiments using beaker ---
+# for dir in "${EXPERIMENT_DIRS[@]}"; do
+#   echo "Submitting experiments in directory: $dir"
+#   for yaml_file in "$dir"/*.yaml; do
+#     if [ -f "$yaml_file" ]; then
+#       echo "Running experiment for: $yaml_file"
+#       beaker experiment create "$yaml_file"
+#     fi
+#   done
+# done
 
 
 

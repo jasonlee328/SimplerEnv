@@ -5,7 +5,7 @@
 # declare -a arr=("/data/input/jiafei/GroundedVLA/checkpoint/mar17_line99-1")
 # declare -a ckpt_paths=("/data/input/jiafei/GroundedVLA/checkpoint/mar17_line99-1")
 
-declare -a ckpt_paths=("/data/input/jiafei/GroundedVLA/apr13-float")
+declare -a ckpt_paths=("molmo-act/apr-14-float-ratio")
 declare -a env_names=(
 # OpenTopDrawerCustomInScene-v0
 # OpenMiddleDrawerCustomInScene-v0

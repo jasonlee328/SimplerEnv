@@ -2,7 +2,7 @@
 
 gpu_id=0
 
-declare -a arr=("/data/input/jiafei/GroundedVLA/apr13-float")
+declare -a arr=("molmo-act/apr-14-float-ratio")
 
 # lr_switch=laying horizontally but flipped left-right to match real eval; upright=standing; laid_vertically=laying vertically
 declare -a coke_can_options_arr=("lr_switch=True")

@@ -11,6 +11,9 @@ tasks:
   - >-
     nvidia-smi &&
     apt update && apt install libglvnd-dev libvulkan1 libjpeg-dev libpng-dev libglib2.0-0 ffmpeg -y &&
+    mkdir -p /data/input/jiafei/GroundedVLA/ &&
+    cd /data/input/jiafei/GroundedVLA && pwd &&
+    git clone --recursive https://github.com/jasonlee328/SimplerEnv.git &&
     source /opt/conda/etc/profile.d/conda.sh &&
     conda activate simpler_env &&
     cd /data/input/jiafei/GroundedVLA/SimplerEnv/ManiSkill2_real2sim &&
@@ -22,7 +25,7 @@ tasks:
     pip install --no-cache-dir --upgrade torchvision &&
     pip install --no-cache-dir --upgrade flash-attn &&
     pip install accelerate==1.6.0 &&
-    bash /data/input/jiafei/GroundedVLA/SimplerEnv/scripts/open_drawer/llava_drawer_matching_close_C2.sh
+    bash /data/input/jiafei/SimplerEnv/scripts/open_drawer/llava_drawer_matching_close_C2.sh
   datasets:
   - mountPath: /data/input
     source:
@@ -45,6 +48,6 @@ tasks:
     priority: urgent
     preemptible: false
   constraints:
-    cluster: [ ai2/jupiter-cirrascale-2, ai2/ceres-cirrascale ]
+    cluster: [ ai2/augusta-google-1 ]
   hostNetworking: true
   leaderSelection: true
