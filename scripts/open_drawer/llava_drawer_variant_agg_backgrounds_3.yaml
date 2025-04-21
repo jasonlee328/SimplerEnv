@@ -67,8 +67,9 @@ tasks:
     apt update && apt install libglvnd-dev libvulkan1 libjpeg-dev libpng-dev libglib2.0-0 ffmpeg -y &&
     source /opt/conda/etc/profile.d/conda.sh &&
     conda activate simpler_env &&
-    mkdir -p /data/input/jiafei/GroundedVLA/SimplerEnv &&
-    git clone --recursive https://github.com/jasonlee328/SimplerEnv.git
+    mkdir -p /data/input/jiafei/GroundedVLA/ &&
+    cd /data/input/jiafei/GroundedVLA/ &&
+    git clone --recursive https://github.com/jasonlee328/SimplerEnv.git &&
     cd /data/input/jiafei/GroundedVLA/SimplerEnv/ManiSkill2_real2sim &&
     pip install -e. &&
     cd /data/input/jiafei/GroundedVLA/SimplerEnv && 
@@ -95,7 +96,7 @@ tasks:
     gpuCount: 1
     sharedMemory: 1000GiB
   context:
-    priority: high
+    priority: urgent
     preemptible: True
   constraints:
     cluster: [ ai2/augusta-google-1 ]

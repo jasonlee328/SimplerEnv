@@ -1,5 +1,57 @@
+# version: v2
+# description: simpler_eval_pick_coke_can_base_matching
+# budget: ai2/prior
+# tasks:
+# - name: eval
+#   replicas: 1
+#   image:
+#     beaker: jiafeid/simpler-docker-ori
+#   command: ['/bin/bash', '-c']
+#   arguments:
+#   - >-
+#     nvidia-smi &&
+#     apt update && apt install libglvnd-dev libvulkan1 libjpeg-dev libpng-dev libglib2.0-0 ffmpeg -y &&
+#     source /opt/conda/etc/profile.d/conda.sh &&
+#     conda activate simpler_env &&
+#     mkdir -p /data/input/jiafei/GroundedVLA/ &&
+#     cd /data/input/jiafei/GroundedVLA/ &&
+#     git clone --recursive https://github.com/jasonlee328/SimplerEnv.git &&
+#     cd /data/input/jiafei/GroundedVLA/SimplerEnv/ManiSkill2_real2sim &&
+#     pip install -e. &&
+#     cd /data/input/jiafei/GroundedVLA/SimplerEnv && 
+#     pip install -e . &&
+#     pip install transformers==4.49.0 &&
+#     pip install torch==2.6.0 &&
+#     pip install --no-cache-dir --upgrade torchvision &&
+#     pip install --no-cache-dir --upgrade flash-attn &&
+#     pip install accelerate==1.6.0 &&
+#     bash /data/input/jiafei/GroundedVLA/SimplerEnv/scripts/pick_coke_can/llava_pick_coke_can_matching_horizontal1.sh
+
+#   result:
+#     path: /data/results
+#   envVars:
+#   - name: ALLENACT_DEBUG_VST_TIMEOUT
+#     value: 2000
+#   - name: ALLENACT_DEBUG
+#     value: true
+#   - name: NCCL_SOCKET_IFNAME
+#     value: ib
+#   - name: NCCL_TIMEOUT
+#     value: 36000000
+#   resources:
+#     gpuCount: 1
+#     sharedMemory: 5000GiB
+#   context:
+#     priority: urgent
+#     preemptible: True
+#   constraints:
+#     cluster: [ ai2/augusta-google-1 ]
+#   hostNetworking: true
+#   leaderSelection: true
+
+
 version: v2
-description: simpler_eval_pick_coke_can_base_matching
+description: simpler_eval_drawer_agg_background_3
 budget: ai2/prior
 tasks:
 - name: eval
@@ -11,11 +63,11 @@ tasks:
   - >-
     nvidia-smi &&
     apt update && apt install libglvnd-dev libvulkan1 libjpeg-dev libpng-dev libglib2.0-0 ffmpeg -y &&
-    mkdir -p /data/input/jiafei/GroundedVLA/ &&
-    cd /data/input/jiafei/GroundedVLA && pwd &&
-    git clone --recursive https://github.com/jasonlee328/SimplerEnv.git &&
     source /opt/conda/etc/profile.d/conda.sh &&
     conda activate simpler_env &&
+    mkdir -p /data/input/jiafei/GroundedVLA/ &&
+    cd /data/input/jiafei/GroundedVLA/ &&
+    git clone --recursive https://github.com/jasonlee328/SimplerEnv.git &&
     cd /data/input/jiafei/GroundedVLA/SimplerEnv/ManiSkill2_real2sim &&
     pip install -e. &&
     cd /data/input/jiafei/GroundedVLA/SimplerEnv && 
@@ -25,11 +77,8 @@ tasks:
     pip install --no-cache-dir --upgrade torchvision &&
     pip install --no-cache-dir --upgrade flash-attn &&
     pip install accelerate==1.6.0 &&
-    bash /data/input/jiafei/SimplerEnv/scripts/pick_coke_can/llava_pick_coke_can_matching_horizontal1.sh
-  datasets:
-  - mountPath: /data/input
-    source:
-      weka: prior-default
+    bash /data/input/jiafei/GroundedVLA/SimplerEnv/scripts/pick_coke_can/llava_pick_coke_can_matching_horizontal1.sh
+
   result:
     path: /data/results
   envVars:
@@ -43,10 +92,10 @@ tasks:
     value: 36000000
   resources:
     gpuCount: 1
-    sharedMemory: 5000GiB
+    sharedMemory: 1000GiB
   context:
-    priority: urgent
-    preemptible: false
+    priority: high
+    preemptible: True
   constraints:
     cluster: [ ai2/augusta-google-1 ]
   hostNetworking: true
