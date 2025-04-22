@@ -51,7 +51,7 @@
 
 
 version: v2
-description: simpler_eval_drawer_agg_background_3
+description: simpler_eval_pick_coke_can_base_matching
 budget: ai2/prior
 tasks:
 - name: eval
@@ -62,7 +62,7 @@ tasks:
   arguments:
   - >-
     nvidia-smi &&
-    apt update && apt install libglvnd-dev libvulkan1 libjpeg-dev libpng-dev libglib2.0-0 ffmpeg -y &&
+    apt update && apt install libglvnd-dev libvulkan1 libjpeg-dev libpng-dev libglib2.0-0 ffmpeg xvfb -y &&
     source /opt/conda/etc/profile.d/conda.sh &&
     conda activate simpler_env &&
     mkdir -p /data/input/jiafei/GroundedVLA/ &&

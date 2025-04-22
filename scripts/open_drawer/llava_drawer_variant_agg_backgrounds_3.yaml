@@ -96,7 +96,7 @@ tasks:
     gpuCount: 1
     sharedMemory: 1000GiB
   context:
-    priority: urgent
+    priority: high
     preemptible: True
   constraints:
     cluster: [ ai2/augusta-google-1 ]
